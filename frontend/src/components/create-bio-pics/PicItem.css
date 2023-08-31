@@ -1,0 +1,61 @@
+.add-pic-wrapper {
+    height: 220px;
+    background-color: white;
+    border: 1px solid lightgrey;
+    opacity: 90%;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    margin-right: 30px;
+    display: flex;
+    justify-content: space-around;
+}
+
+.add-pic-wrapper:hover {
+    filter: brightness(0.9);
+    cursor: pointer;
+}
+
+.empty-pic-wrapper {
+    height: 220px;
+    border: 3px dashed lightslategray;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    margin-right: 30px;
+}
+
+input[type='file'] {
+    color: transparent;
+    cursor: pointer;    
+}
+
+input::file-selector-button {
+    background-color: none;
+    margin-left: 20px;
+}
+
+
+.pic-item-wrapper {
+    height: 220px;
+    border-radius: 10px;
+    display: flex;
+    margin-bottom: 30px;
+    margin-right: 30px;
+}
+
+
+.pic-item-wrapper > img {
+    border-radius: 10px;
+    width: 200px;
+    object-fit: cover;
+    object-position: center center;
+}
+
+#upload-pic-btn {
+    background-color: white;
+    opacity: 90%;
+    width: 100%;
+    text-align: center;
+    font-size: 100px;
+    padding-top: 20px;
+    border-radius: 10px;
+}

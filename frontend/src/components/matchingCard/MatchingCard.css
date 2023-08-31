@@ -1,0 +1,30 @@
+.Header {
+    height:fit-content;
+}
+
+.Header h1{
+    color: #06b2b7;
+    font-weight: bold;
+}
+
+.personCard {
+    height: 100%;
+}
+
+.personCardDiv {
+    background-color: red;
+    height: 100%;
+}
+
+.wrapper {
+    display:flex;
+    flex-direction: column;
+}
+
+.cards {
+    height: 100%;
+}
+
+.buttondiv {
+    margin: auto;
+}

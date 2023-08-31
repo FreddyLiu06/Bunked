@@ -11,7 +11,7 @@ const encoder = require('@tensorflow-models/universal-sentence-encoder') // to l
 
 // app
 const app = express();
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 
@@ -50,8 +50,10 @@ app.use(cors({origin: true, credentials: true}));
 // routes
 const userRoutes = require('./routes/user.routes');
 const actionRoutes = require('./routes/action.routes');
+const matchRoutes = require('./routes/match.routes');
 app.use("/", userRoutes);
 app.use("/actions/", actionRoutes);
+app.use("/match/", matchRoutes);
 
 // port
 const port = process.env.PORT || 8080;
@@ -59,5 +61,41 @@ const port = process.env.PORT || 8080;
 // Encoder model
 encoder.load().then(model => app.set('encoder', model));
 
+
+// chat websocket
+
+const { Server } = require("socket.io");
+const http = require("http");
+const server = http.createServer(app);
+
+const io = new Server(server, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"],
+    },
+  });
+  
+  io.on("connection", (socket) => {
+     console.log(`User Connected: ${socket.id}`);
+   
+     socket.on("join_room", (data) => {
+       socket.join(data);
+       console.log(`User with ID: ${socket.id} joined room: ${data}`);
+     });
+   
+     socket.on("send_message", (data) => {
+        console.log("Sending to room: " + data.room);
+        io.to(data.room).emit("receive_message", data);
+        // db.addMessage(data.room, data.author, data.content, function(err, data) {});
+     });
+  
+     socket.on("leave_room", (data) => {
+        socket.leave(data);
+        console.log(`User with ID: ${socket.id} left room: ${data}`);
+     });
+  });
+
+
 // listener
-const server = app.listen(port, () => console.log('Server is running on port ' + port));
+// const server = app.listen(port, () => console.log('Server is running on port ' + port));
+server.listen(port, () => console.log('Server is running on port ' + port));

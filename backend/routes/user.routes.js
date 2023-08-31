@@ -9,13 +9,11 @@ const userImgControllers = require('../controllers/user.image.controllers');
 
 // Middlewares
 const validate = require('../middlewares/validators');
-const multer = require('../middlewares/image.multer');
+const multerImg = require('../middlewares/image.multer');
 const { restart } = require('nodemon');
 
 // Authorization function
 var authorizeUser = async (req, res, next) => {
-    console.log("HERE")
-    console.log(req.session.user);
     if (req.session.user && req.session.user.email) {
         console.log(req.method);
         if (req.method === "POST") {
@@ -55,7 +53,7 @@ router.post('/register', validate.validateEmail, validate.validatePassword, user
 router.post('/create-bio', authorizeUser, validate.checkBio, userControllers.createUserBio);
 router.post('/update-bio', authorizeUser, validate.updateBio, userControllers.updateUserBio);
 router.get('/get-bio', authorizeUser, userControllers.getUserBio);
-router.post('/profile-pic', authorizeUser, multer.saveImg, userImgControllers.uploadImage);
+router.post('/profile-pic', multerImg.saveImg, userImgControllers.uploadImage);
 router.get('/profile-pic', authorizeUser, userImgControllers.getImage);
 router.delete('/profile-pic', authorizeUser, userImgControllers.deleteImage);
 router.post('/login', validate.validateEmail, userControllers.loginUser);

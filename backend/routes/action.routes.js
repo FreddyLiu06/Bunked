@@ -18,6 +18,6 @@ router.delete('/removeUserWait', actionController.removeFromWaitingRoom); // Rem
 router.post('/updateUserWait', actionController.updateUserWait); // Update a user on a waitlist, either accept or reject
 
 router.get('/checkMatch', actionController.checkMatch); // Route to check if two users match
-
+router.post('/generateNewRecs', actionController.generateNewRecs);
 
 module.exports = router;

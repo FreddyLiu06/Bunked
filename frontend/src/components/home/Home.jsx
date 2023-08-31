@@ -3,10 +3,14 @@ import './Home.css';
 import { Navigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import axios from '../AxiosInstance';
-import { useNavigate } from 'react-router-dom';
-import Matching from "../matching/Matching";
+import { useNavigate, Routes, Route } from 'react-router-dom';
+import MatchingDetail from "../matchingDetail/MatchingDetail";
 import Waitroom from '../waitroom/Waitroom';
-
+import Matches from "../matches/Matches";
+import MatchingCard from '../matchingCard/MatchingCard';
+import Sidebar from '../Sidebar/Sidebar';
+import Profile from '../profile/Profile';
+import Chat from '../chat/Chat';
 
 function Home() {
 
@@ -58,61 +62,50 @@ function Home() {
     }, []);
 
 
-    const logout = async () => {
-        axios.delete('/logout').then(() => {
-            Cookies.remove('email');
-            navigate('/');
-        });
-    }
-
-    if (!Cookies.get('email')) {
-        return <Navigate to = "/"/>;
-    } else if (!loading) {
-        if (bio.err) {
-            return <Navigate to = "/"/>;
-        } 
-        // Disabled for development:
-        // else if (bio.notCreated) {
-        //     return <Navigate to = '/create-bio' state = {{internal: true}}/>;
-        // } 
-        else {
+    // if (!Cookies.get('email')) {
+    //     return <Navigate to = "/"/>;
+    // } else if (!loading) {
+    //     if (bio.err) {
+    //         return <Navigate to = "/"/>;
+    //     }
+    //     else if (bio.notCreated) {
+    //         return <Navigate to = '/create-bio' state = {{internal: true}}/>;
+    //     } 
+    //     else {
             return (
                 <div className = "homepage-container">
 
-                    <div className = "sidebar-wrapper">
-                        <div className = "sidebar">
-                            <h1>Homepage</h1>
-                            <div>User: {` ${Cookies.get('email')}`}</div>
+                    <Sidebar setDisplayMode={setDisplayMode}/>
 
-                            <p>Options:</p>
-
-                            <button className = "temp-toggle" onClick = {() => {setDisplayMode(0)}}>Matching</button>
-
-                            <button className = "waitroom-toggle" onClick = {() => {setDisplayMode(1)}}>Waiting Room</button>
-
-                            <button className = "chat-toggle" onClick = {() => {setDisplayMode(2)}}>Chat</button>
-
-                            <button className = "home-logout" onClick = {logout}>Logout</button>
-                        </div>
-                    </div>
                     <div className = "interface-wrapper">
                         <div className = "interface-inner-wrapper">
-                            { recommendedUsers.length>0 && displayMode === 0 && 
+                            {/* { recommendedUsers.length>0 && displayMode === 0 && 
                                 <Matching baseEmail={Cookies.get('email')} userArr={recommendedUsers} lastIndex = {lastIndex} setLastIndex = {setLastIndex} resetRecommend={resetRecommend}/>
                             }
                             {
                                 displayMode === 1 && <Waitroom baseEmail={Cookies.get('email')}/>
                             }
-                            {// TO DO: ADD CHAT COMPONENT HERE
-                            }
+                            {
+                                displayMode === 2 && <MatchingCard baseEmail={Cookies.get('email')}></MatchingCard>
+                            } */}
+                            <Routes>
+                                <Route path="/" element={<MatchingCard />} />
+                                <Route path="/temp" element={<MatchingDetail baseEmail={Cookies.get('email')} userArr={recommendedUsers} lastIndex = {lastIndex} setLastIndex = {setLastIndex} resetRecommend={resetRecommend}/>} />
+
+                                <Route path="/matchingDetail" element={<MatchingDetail />}/>
+
+                                {/* <Route path="/chat" Chat component here />  */}
+                                <Route path="/profile" element={<Profile />}/>
+                                <Route path="/chat" element = {<Chat/>}/> 
+                            </Routes>
                         </div>
                     </div>
                 </div>
             )
-        }
-    } else {
-        return <>Loading...</>;
-    }
+    //     }
+    // } else {
+    //     return <>Loading...</>;
+    // }
     
 }
 

@@ -118,55 +118,87 @@ exports.getUserBio = async (req, res) => {
       gender: bio.gender,
       majors: bio.majors,
       year: bio.year,
+      extroversion: bio.extroversion,
+      cleanliness: bio.cleanliness,
+      noise: bio.noise,
+      ...(bio.aboutBio && {aboutBio: bio.aboutBio}),
       ...(bio.dorm && {dorm: bio.dorm}),
       ...(bio.greek && {greek: bio.greek}),
       ...(bio.hobbies && {hobbies: bio.hobbies}),
       ...(bio.hometown && {hometown: bio.hometown}),
       ...(bio.shows && {shows: bio.shows}),
       ...(bio.instagram && {instagram: bio.instagram}),
+      ...(bio.sleep && {sleep: bio.sleep}),
+      ...(bio.guests && {guests: bio.guests}),
+      ...(bio.smoke && {smoke: bio.smoke}),
+      ...(bio.drink && {drink: bio.drink}),
+      ...(bio.music && {music: bio.music}),
     })
   }
 }
 
 // Create bio for user
 exports.createUserBio = async (req, res) => {
-    // Check if params meet validation requirements
-    const validationErrors = validate.validationResult(req);
-    const errors = [];
+  // Check if params meet validation requirements
+  const validationErrors = validate.validationResult(req);
 
-    if (!validationErrors.errors.isEmpty) {
-        validationErrors.errors.forEach((error) => {
-          errors.push({param: error.param, msg: error.msg});
-        });
-    }
+  if (validationErrors.errors.length !== 0) {
+    return res.status(400).json('Error: ' + validationErrors.errors[0].msg);
+  }
 
-    if (errors.length) {
-        return res.status(400).json({
-          error: errors,
-        });
-    }
+  // Check if email is a registered user and also get user's name
+  const email = req.body.email.toLowerCase();
 
-    // create Bio    
-    const email = req.body.email.toLowerCase();
-    const name = req.body.name;
-    const gender = req.body.gender;
-    console.log(req.body.majors)
+  var user = await User.findOne({email});
+  
+  if (!user) {
+    return res.status(400).json('Error: user not found');
+  }
 
-    const majors = req.body.majors;
-    const year = req.body.year;
-    const extroversion = req.body.extroversion;
-    const cleanliness = req.body.cleanliness;
-    const noise = req.body.noise;
-    
-    const newBio = new UserBio ({
-      email,
-      name,
-      gender,
-      majors,
-      year,
-      extroversion,
-      cleanliness,
-      noise,
+  if (await UserBio.findOne({email})) {
+    return res.status(400).json('Error: Bio already exists');
+  }
+
+  // Create Bio    
+  const name = user.name;
+  const gender = req.body.gender;
+  const majors = req.body.majors;
+  const year = req.body.year;
+  const extroversion = req.body.extroversion;
+  const cleanliness = req.body.cleanliness;
+  const noise = req.body.noise;
+  const sleep = req.body.sleep;
+  const guests = req.body.guests;
+  const dorm = req.body.dorm;
+  const greek = req.body.greek;
+  const smoke = req.body.smoke;
+  const drink = req.body.drink;
+  const hobbies = req.body.hobbies;
+  const hometown = req.body.hometown;
+  const music = req.body.music;
+  const shows = req.body.shows;
+  const instagram = req.body.instagram;
+  
+  const newBio = new UserBio ({
+    email,
+    name,
+    gender,
+    majors,
+    year,
+    extroversion,
+    cleanliness,
+    noise,
+    sleep,
+    guests,
+    dorm,
+    greek,
+    smoke,
+    drink,
+    hobbies,
+    hometown,
+    music,
+    shows,
+    instagram,
   });
 
   newBio.save().then(() => res.json('Bio Created!'))
@@ -195,6 +227,7 @@ exports.updateUserBio = async (req, res) => {
 
   // Check if bio exists and update it
   const email = req.body.email.toLowerCase();
+  const aboutBio = req.body.aboutBio
   const sleep = req.body.sleep;
   const guests = req.body.guests;
   const dorm = req.body.dorm;
@@ -216,6 +249,7 @@ exports.updateUserBio = async (req, res) => {
   };
 
   const update = {
+    ...(aboutBio && {aboutBio}),
     ...(sleep && {sleep}),
     ...(guests && {guests}),
     ...(dorm && {dorm}),
@@ -233,7 +267,6 @@ exports.updateUserBio = async (req, res) => {
   UserBio.findOneAndUpdate(filter, update)
     .then(() => res.json('Bio Updated!'))
     .catch(err => res.status(400).json('Error: ' + err));
-
 }
 
 // Function that gives (10) recommendations based on nearest neighbors

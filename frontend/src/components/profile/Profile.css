@@ -1,0 +1,92 @@
+.left {
+    /* background-color: red; */
+}
+
+.imagediv {
+    background-color:green;
+    height: 60%;
+    text-align: center;
+}
+
+.left .textdiv {
+    font-size: larger;
+}
+
+.left .smallerinfo {
+    width: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.leftlistitem {
+    width: 100%;
+    list-style-type: none;
+    display: flex;
+    flex-direction: row;
+    margin-top: 5%;
+}
+
+.leftlistitem .icon {
+    width: 10%;
+}
+
+.leftlistitem .text {
+    width: 90%;
+}
+
+.right {
+    /* background: blue; */
+    display: table;
+    position: relative;
+}
+
+.right .about {
+    /* background: yellow; */
+    display:table-row;
+    min-height: 15%;
+    height: 15%;
+    overflow: hidden;
+}
+
+.right .subtitle h2{
+    font-weight:normal;
+}
+
+.right .categories {
+    /* background-color: red; */
+    display: table-row;
+}
+
+.right .categoriesInner{
+    display:table;
+}
+
+.right .categoriesInner .chips .chip {
+    font-size: 16px;
+    margin-right: 10px;
+}
+
+.right .categoriesInner .textinput {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 16px;
+}
+
+.right .subtitle {
+    display:table-row;
+}
+
+.right .buttons {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+}
+
+.right .buttons .bttn {
+    width: 80px;
+    height: 40px;
+}
+
+.right .buttons .disc {
+    margin-right: 20px;
+}

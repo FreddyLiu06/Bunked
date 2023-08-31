@@ -16,8 +16,8 @@ module.exports.checkBio = checkSchema({
     gender: {
         custom: {
             options: val => {
-                return (val == "male" || val == "female" ||
-                    val == "other" || val == "pnts");
+                return (val == "Male" || val == "Female" ||
+                    val == "Other" || val == "Prefer not to say");
             }
         },
         errorMessage: 'Gender field error',
@@ -32,9 +32,13 @@ module.exports.checkBio = checkSchema({
         errorMessage: 'Majors field error',
     },
     year: {
-        isInt: true,
+        custom: {
+            options: val => {
+                return (val == "Freshman" || val == "Sophomore" ||
+                    val == "Junior" || val == "Senior");
+            }
+        },
         errorMessage: 'Year field error',
-
     },
     extroversion: {
         isInt: true,
@@ -48,6 +52,87 @@ module.exports.checkBio = checkSchema({
         in: ['body'],
         errorMessage: 'Noise field empty',
     },
+    sleep: {
+        optional: true,
+        custom: {
+            options: value => {
+                return (Number.isInteger(value.start) && Number.isInteger(value.end));
+            }
+        },
+        errorMessage: 'Sleep field error',
+    },
+    guests: {
+        optional: true,
+        isInt: true,
+    },
+    dorm: {
+        optional: true,
+        custom: {
+            options: val => {
+                return (val instanceof Array);
+            }
+        },
+    },
+    greek: {
+        isInt: true,
+        optional: true,
+    },
+    smoke: {
+        optional: true,
+        custom: {
+            options: val => {
+                return (val == "Never" || val == "Socially" ||
+                    val == "Yes");
+            }
+        },
+    },
+    drink: {
+        optional: true,
+        custom: {
+            options: val => {
+                return (val == "Never" || val == "Socially" ||
+                    val == "Yes");
+            }
+        },
+    },
+    hobbies: {
+        optional: true,
+        custom: {
+            options: val => {
+                return (val instanceof Array);
+            }
+        },
+    },
+    hometown: {
+        optional: true,
+    },
+    music: {
+        optional: true,
+        custom: {
+            options: val => {
+                return (val instanceof Array);
+            }
+        },
+    },
+    shows: {
+        optional: true,
+        custom: {
+            options: val => {
+                return (val instanceof Array);
+            }
+        },
+    },
+    pictures: {
+        optional: true,
+        custom: {
+            options: val => {
+                return (val instanceof Array);
+            }
+        },
+    },
+    instagram: {
+        optional: true,
+    }
 });
 
 module.exports.updateBio = checkSchema({
@@ -59,8 +144,8 @@ module.exports.updateBio = checkSchema({
         optional: true,
         custom: {
             options: val => {
-                return (val == "male" || val == "female" ||
-                    val == "other" || val == "pnts");
+                return (val == "Male" || val == "Female" ||
+                    val == "Other" || val == "Prefer not to say");
             }
         },
         errorMessage: 'Gender field error',
@@ -69,6 +154,7 @@ module.exports.updateBio = checkSchema({
         optional: true,
         custom: {
             options: val => {
+                console.log(val);
                 return (val instanceof Array);
             }
         },
@@ -76,7 +162,12 @@ module.exports.updateBio = checkSchema({
     },
     year: {
         optional: true,
-        isInt: true,
+        custom: {
+            options: val => {
+                return (val == "Freshman" || val == "Sophomore" ||
+                    val == "Junior" || val == "Senior");
+            }
+        },
         errorMessage: 'Year field error',
 
     },

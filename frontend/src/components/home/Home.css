@@ -4,33 +4,23 @@
     height: 100vh;
     min-height: 700px;
     justify-content: space-between;
+    font-family: "Inter";
+    background-color: #e9f5f6;
 }
-
+/* 
 .sidebar-wrapper {
     min-width: 600px;
     flex: 2;
     display: grid;
     padding: 50px;
     padding-right: 25px;
-}
+} */
 
 .interface-wrapper {
     flex: 5;
     display: grid;
     padding: 50px;
     padding-left: 25px;
-}
-
-.sidebar {
-    background-color: greenyellow;
-    border-radius: 20px;
-    padding: 30px;
-    min-height: 600px;
-    position: relative;
-}
-
-.interface {
-    background-color: blueviolet;
 }
 
 .home-logout {
@@ -40,7 +30,7 @@
 
 .interface-inner-wrapper {
     min-width: 1200px;
-    background-color: burlywood;
+    background-color: white;
     border-radius: 20px;
     padding: 30px;
     display: grid;

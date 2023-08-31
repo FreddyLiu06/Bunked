@@ -1,6 +1,9 @@
 // Methods to change and update the actions of the users
 let Action = require('../models/action.model');
 let User = require('../models/user.model');
+let UserBio = require('../models/user.bio.model');
+
+const recommender = require('../scripts/recommender');
 
 // Gets all other users that a given user has accepted
 // Input URL params: req.query.email, email of the base user
@@ -24,6 +27,28 @@ const getAccepted = async (req, res) => {
     const targetUsers = await User.find({email: {$in: targetEmails}});
     
     return res.status(200).json(targetUsers);
+}
+
+// Helper function that recommends the next user after an acceptance or rejection
+// Params: baseEmail is email address of the base person
+// Output: user object of the recommended person
+// ASSUMES that all of the fields are filled in (except for hobbies, images, dorm, music, shows)
+const getNextRecommend = async (baseEmail) => {  
+    // Check if input user exists
+    const baseuser = await User.findOne({email: baseEmail});
+    if (!baseuser) {
+        return null;
+    }
+    
+    const baseuserbio = await UserBio.findOne({email: baseEmail});
+    if (!baseuserbio) {
+        return null;
+    }
+    
+    let nearestUsers = await recommender.findNearest(baseuserbio, 1); // Can change the number in the second parameter to get larger/smaller number of recommendations
+    nearestUsers = nearestUsers.map(userArr => userArr[0]);
+    
+    return nearestUsers[0];
 }
 
 // Route used when base user accepts target user
@@ -50,14 +75,29 @@ const acceptUser = async (req, res) => {
     // Add to database
     const actionType = 0;
     
-    const newPair = new Action({
-        baseUserEmail,
-        targetUserEmail,
-        actionType,
-    })
+    const newUpdate = {
+        actionType: actionType
+    }
 
-    newPair.save().then(() => {return res.status(201).json('User accepted')})
-        .catch(err => {return res.status(400).json('Error: ' + err)})
+    try {
+        await Action.findOneAndUpdate({"baseUserEmail": baseUserEmail, "targetUserEmail": targetUserEmail, "actionType": 1}, newUpdate);
+    } catch (err) {
+        console.log('shit');
+        return res.status(400).json('Error: ' + err);
+    }
+
+    const nextUser = await getNextRecommend(baseUserEmail);
+    if (nextUser === null) {
+        return res.status(400).json('Recommender error');
+    }
+
+    const waitRoomAdded = await addToWaitingRoom(baseUserEmail, nextUser.email);
+    if (waitRoomAdded === null) {
+        return res.status(400).json('New waitroom error');
+    }
+
+    return res.status(201).json('New User Accepted');
+
 }
 
 // Gets all other users that a given user has rejected
@@ -108,14 +148,28 @@ const rejectUser = async (req, res) => {
     // Add to database
     const actionType = 2;
     
-    const newPair = new Action({
-        baseUserEmail,
-        targetUserEmail,
-        actionType,
-    })
+    const newUpdate = {
+        actionType: actionType
+    }
 
-    newPair.save().then(() => {return res.status(201).json('User rejected')})
-        .catch(err => {return res.status(400).json('Error: ' + err)})
+    try {
+        await Action.findOneAndUpdate({"baseUserEmail": baseUserEmail, "targetUserEmail": targetUserEmail, "actionType": 1}, newUpdate);
+    } catch (err) {
+        console.log('shit');
+        return res.status(400).json('Error: ' + err);
+    }
+
+    const nextUser = await getNextRecommend(baseUserEmail);
+    if (nextUser === null) {
+        return res.status(400).json('Recommender error');
+    }
+
+    const waitRoomAdded = await addToWaitingRoom(baseUserEmail, nextUser.email);
+    if (waitRoomAdded === null) {
+        return res.status(400).json('New waitroom error');
+    }
+
+    return res.status(201).json('User Rejected');
 }
 
 // Gets all other users in given user's waiting room
@@ -137,30 +191,30 @@ const getUsersInWaitingRoom = async (req, res) => {
     const targetEmails = pairings.map(pair => pair.targetUserEmail);
 
     // Get target users
-    const targetUsers = await User.find({email: {$in: targetEmails}});
+    const targetUsers = await UserBio.find({email: {$in: targetEmails}});
     
     return res.status(200).json(targetUsers);
 }
 
 // Add a user to a given user's waiting room
-// Input body: req.body.baseEmail  email of base user, req.body.targetEmail email of added user
-const addToWaitingRoom = async (req, res) => {
+// Param baseEmail, targetEmail: emails of the base person and person to be added
+const addToWaitingRoom = async (baseEmail, targetEmail) => {
 
-    const baseUserEmail = req.body.baseEmail;
-    const targetUserEmail = req.body.targetEmail;
+    const baseUserEmail = baseEmail;
+    const targetUserEmail = targetEmail;
 
     // Check if both user's exist
     const baseUser = await User.findOne({email: baseUserEmail});
     const targetUser = await User.findOne({email: targetUserEmail});
 
     if (!baseUser || !targetUser) {
-        return res.status(404).json('User does not exist');
+        return null;
     }
 
     // See if there is already record
     const numExists = await Action.count({baseUserEmail: baseUserEmail, targetUserEmail: targetUserEmail, actionType: 1});
     if (numExists > 0) {
-        return res.status(409).json('Error: User already in the waiting room');
+        return null;
     }
 
     // Add to database
@@ -172,8 +226,8 @@ const addToWaitingRoom = async (req, res) => {
         actionType,
     })
 
-    newPair.save().then(() => {return res.status(201).json('User added to waiting room')})
-        .catch(err => {return res.status(400).json('Error: ' + err)})
+    newPair.save().then(() => {return 'Added to wait room'})
+        .catch(err => {return null})
 }
 
 // Add a user to a given user's waiting room
@@ -213,7 +267,7 @@ const checkMatch = async (req, res) => {
         return res.status(404).json('User does not exist');
     }
 
-    const checkNum = await Action.count({$or: [{baseUserEmail: firstEmail, targetUserEmail: secEmail}, {baseUserEmail: secEmail, targetUserEmail: firstEmail}]});
+    const checkNum = await Action.count({$or: [{baseUserEmail: firstEmail, targetUserEmail: secEmail, actionType: 0}, {baseUserEmail: secEmail, targetUserEmail: firstEmail, actionType: 0}]});
 
     if (checkNum < 2) {
         return res.json(false);
@@ -239,6 +293,31 @@ const updateUserWait = async (req, res) => {
 
 }
 
+// Route to generate new recommendations into waiting room
+// Input body: req.body.email, email of the user for whom we want to generate new recommendations
+const generateNewRecs = async (req, res) => {
+    const email = req.body.email;
+    
+    const baseuserbio = await UserBio.findOne({email: email});
+    if (!baseuserbio) {
+        return null;
+    }
+    const nearestUsers = await recommender.findNearest(baseuserbio, 6);
+
+    nearestUsers.forEach(user => {
+        const newPair = new Action({
+            baseUserEmail: email,
+            targetUserEmail: user[0].email,
+            actionType: 1
+        })
+
+        newPair.save()
+    })
+
+    return res.status(200).json("New Recommendations Generated")
+
+}
+
 module.exports = {
     getAccepted,
     acceptUser,
@@ -249,4 +328,5 @@ module.exports = {
     removeFromWaitingRoom,
     checkMatch,
     updateUserWait,
+    generateNewRecs
 }
